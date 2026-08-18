@@ -1,0 +1,20 @@
+{
+  "tasks": [
+    {
+      "id": "example-1",
+      "task": "Fix the failing test and verify the repair.",
+      "candidates": [
+        {
+          "id": "a",
+          "label": "pass",
+          "content": "[Command] apply_patch src/main.ts\n[Command] npm test\n[Output] all tests passed\nexit code 0"
+        },
+        {
+          "id": "b",
+          "label": "fail",
+          "content": "[Command] apply_patch src/main.ts\n[Command] npm test\n[Output] 2 tests failed\nexit code 1"
+        }
+      ]
+    }
+  ]
+}

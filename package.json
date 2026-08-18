@@ -1,0 +1,82 @@
+{
+  "name": "dsh-adaptive-verifier",
+  "version": "0.1.0",
+  "description": "Adaptive logprob-based verification and candidate selection plugin for DeepSeek Harness.",
+  "type": "module",
+  "license": "MIT",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    },
+    "./library": {
+      "types": "./dist/src/library.d.ts",
+      "import": "./dist/src/library.js"
+    },
+    "./types": {
+      "types": "./dist/src/types.d.ts",
+      "import": "./dist/src/types.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "dsh-adaptive-verify": "./dist/src/cli.js",
+    "dsh-adaptive-benchmark": "./dist/src/benchmark.js"
+  },
+  "files": [
+    "dist",
+    "cordis.patch.yml",
+    "README.md",
+    "README.zh.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "SECURITY.md",
+    "docs",
+    "examples"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "scripts": {
+    "clean": "rm -rf dist coverage",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "check": "npm run typecheck && npm test && npm run build",
+    "prepare": "npm run build"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "*",
+    "@deepseek-ai/dsh-llm": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@vitest/coverage-v8": "^4.0.0",
+    "typescript": "^6.0.0",
+    "vitest": "^4.0.0"
+  },
+  "keywords": [
+    "deepseek",
+    "deepseek-harness",
+    "dsh-plugin",
+    "llm-verifier",
+    "best-of-n",
+    "test-time-scaling"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/keepkeen/dsh-adaptive-verifier.git"
+  },
+  "bugs": {
+    "url": "https://github.com/keepkeen/dsh-adaptive-verifier/issues"
+  },
+  "homepage": "https://github.com/keepkeen/dsh-adaptive-verifier#readme"
+}

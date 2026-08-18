@@ -1,0 +1,7 @@
+node_modules/
+dist/
+coverage/
+.env
+.dsh-adaptive-verifier/
+*.log
+.DS_Store

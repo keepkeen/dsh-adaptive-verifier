@@ -1,0 +1,13 @@
+{
+  "task": "Fix the failing test and verify the repair.",
+  "candidates": [
+    {
+      "id": "candidate-a",
+      "content": "[Command] sed -i 's/old/new/' src/main.ts\n[Command] npm test\n[Output] 12 tests passed\nexit code 0"
+    },
+    {
+      "id": "candidate-b",
+      "content": "[Command] sed -i 's/old/new/' src/main.ts\n[Command] npm test\n[Output] 2 tests failed\nexit code 1"
+    }
+  ]
+}
