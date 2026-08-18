@@ -49,4 +49,4 @@ When `ctx.adaptiveVerifier` is called outside an agent request and `backend: har
 
 ### `deepseek`
 
-Used only by standalone CLI / explicit `deepseek-logprob` mode. It is not a mirror of the current generator provider.
+Used only by standalone CLI / explicit `deepseek-logprob` mode. It is not a mirror of the current generator provider. The default credential reference is `DSH_VERIFIER_DEEPSEEK_API_KEY`, deliberately separate from generator/provider credentials.
