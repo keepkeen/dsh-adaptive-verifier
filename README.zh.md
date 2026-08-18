@@ -67,7 +67,7 @@ verifier:
   model: deepseek-v4-flash
 ```
 
-这时才启用 DeepSeek HTTP/logprob 代码，并使用它自己的 `deepseek.*` 配置 / `DEEPSEEK_API_KEY`。**不会从当前 generator route 猜 Key、猜 endpoint 或猜 model。**
+这时才启用 DeepSeek HTTP/logprob 代码，并使用它自己的 `deepseek.*` 配置 / `DSH_VERIFIER_DEEPSEEK_API_KEY`。**不会从当前 generator route 猜 Key、猜 endpoint 或猜 model。**
 
 ## 推荐安装
 
@@ -147,7 +147,7 @@ Harness Agent Loop
 
 ```text
 插件主逻辑
-  ❌ 不读取 DEEPSEEK_API_KEY
+  ❌ 不读取当前 generator 的任何 API Key
   ❌ 不读取 OpenRouter Key
   ❌ 不读取 Anthropic Key
   ❌ 不从 model 名推断供应商
@@ -159,7 +159,7 @@ Harness adapter
   ✅ 自己发送网络请求
 ```
 
-只有显式选择 `deepseek-logprob` 这种 provider-specific backend 时，才需要那一 backend 自己的 credential 配置。
+只有显式选择 `deepseek-logprob` 这种 provider-specific backend 时，才需要那一 backend 自己的 credential 配置；默认引用名为 `DSH_VERIFIER_DEEPSEEK_API_KEY`，与 generator/provider 凭据明确分离。
 
 ## 兼容性
 
