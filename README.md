@@ -45,7 +45,7 @@ verifier:
   model: deepseek-v4-flash
 ```
 
-That mode uses the standalone DeepSeek HTTP configuration (`deepseek.*` / `DEEPSEEK_API_KEY`) and is never inferred from the generator route.
+That mode uses the standalone DeepSeek HTTP configuration (`deepseek.*` / `DSH_VERIFIER_DEEPSEEK_API_KEY`) and is never inferred from the generator route.
 
 ## Install
 
