@@ -29,7 +29,7 @@ The benchmark CLI strips `label` before invoking the selector.
 
 ```bash
 npm run build
-export DEEPSEEK_API_KEY='...'
+export DSH_VERIFIER_DEEPSEEK_API_KEY='...'
 dsh-adaptive-benchmark --input benchmark.json --output result.json
 ```
 
