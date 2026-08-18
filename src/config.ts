@@ -50,7 +50,7 @@ export const DEFAULT_BUDGET: VerificationBudgetConfig = {
 
 export const DEFAULT_CONFIG: AdaptiveVerifierConfig = {
   deepseek: {
-    apiKeyEnv: 'DEEPSEEK_API_KEY',
+    apiKeyEnv: 'DSH_VERIFIER_DEEPSEEK_API_KEY',
     baseURL: 'https://api.deepseek.com',
     model: 'deepseek-v4-flash',
     timeoutMs: 120_000,
