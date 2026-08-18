@@ -1,31 +1,37 @@
-# Add the plugin as a bundle, then override this row's config in your profile.
 - id: adaptive-verifier
   name: dsh-adaptive-verifier
   config:
+    # Candidate generation keeps whatever provider/model the Harness agent uses.
     adapter:
       enabled: true
-      provider: deepseek-verified
+      transparent: true
+      # Empty means every agent-loop provider. Add names here to scope it.
+      targetProviders: []
       initialCandidates: 2
       maxCandidates: 4
       generationTemperature: 0.6
+
+    # Default: verifier calls go through Harness too. No API key is read by this plugin.
+    verifier:
+      backend: harness
+      # Omit provider/model to inherit the current agent route.
+      # Or pin an independent verifier route, e.g.:
+      # provider: deepseek-official
+      # model: deepseek-v4-flash
+
     verification:
       initialRepeats: 1
       maxRepeats: 4
       reverseOnAmbiguity: true
+
     budget:
       maxCalls: 12
       maxUncachedInputTokens: 120000
       maxOutputTokens: 40000
       maxWallClockMs: 120000
       maxEstimatedInputTokensPerCall: 90000
+
     hooks:
       observeSessions: true
       evidenceGate: advisory
       steerBeforeTurnEnd: false
-
-# In the agent row supplied by your profile, choose this route:
-# provider: deepseek-verified
-# model: deepseek-v4-flash
-#
-# DeepSeek Harness patch rows replace a row's complete config rather than
-# deep-merging it, so preserve the other keys required by your agent row.

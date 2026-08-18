@@ -107,31 +107,35 @@ export async function* candidateToChunks(
   candidate: GenerateCandidateResult,
   aggregateUsage: TokenUsage = candidate.usage,
 ): AsyncIterable<HarnessStreamChunk> {
-  let index = 0
-  if (candidate.reasoning) {
-    yield { type: 'block-start', index, blockType: 'reasoning' }
-    yield { type: 'reasoning-delta', index, text: candidate.reasoning }
-    yield { type: 'block-end', index, block: { type: 'reasoning', text: candidate.reasoning } }
-    index += 1
-  }
-  if (candidate.content) {
-    yield { type: 'block-start', index, blockType: 'text' }
-    yield { type: 'text-delta', index, text: candidate.content }
-    yield { type: 'block-end', index, block: { type: 'text', text: candidate.content } }
-    index += 1
-  }
-  for (const call of candidate.toolCalls) {
-    yield { type: 'block-start', index, blockType: 'tool-call' }
-    yield {
-      type: 'tool-call-delta', index, id: call.id, name: call.name,
-      argumentsDelta: call.arguments,
+  const blocks: HarnessContentBlock[] = candidate.blocks
+    ? [...candidate.blocks]
+    : []
+  if (!candidate.blocks) {
+    if (candidate.reasoning) blocks.push({ type: 'reasoning', text: candidate.reasoning })
+    if (candidate.content) blocks.push({ type: 'text', text: candidate.content })
+    for (const call of candidate.toolCalls) {
+      blocks.push({ type: 'tool-call', id: call.id, name: call.name, arguments: call.arguments })
     }
-    yield {
-      type: 'block-end', index,
-      block: { type: 'tool-call', id: call.id, name: call.name, arguments: call.arguments },
-    }
-    index += 1
   }
+
+  for (const [index, block] of blocks.entries()) {
+    yield { type: 'block-start', index, blockType: block.type }
+    if (block.type === 'reasoning' && typeof block.text === 'string') {
+      yield { type: 'reasoning-delta', index, text: block.text }
+    } else if (block.type === 'text' && typeof block.text === 'string') {
+      yield { type: 'text-delta', index, text: block.text }
+    } else if (block.type === 'tool-call') {
+      yield {
+        type: 'tool-call-delta',
+        index,
+        id: String(block.id ?? makeId('call')),
+        name: typeof block.name === 'string' ? block.name : undefined,
+        argumentsDelta: String(block.arguments ?? '{}'),
+      }
+    }
+    yield { type: 'block-end', index, block }
+  }
+
   yield {
     type: 'usage',
     usage: {
@@ -144,7 +148,9 @@ export async function* candidateToChunks(
   }
   yield {
     type: 'finish',
-    reason: candidate.toolCalls.length > 0 ? { kind: 'tool-calls' } : { kind: 'stop' },
+    reason: candidate.nativeFinishReason
+      ?? (candidate.toolCalls.length > 0 ? { kind: 'tool-calls' } : { kind: 'stop' }),
+    ...(candidate.replayState === undefined ? {} : { replayState: candidate.replayState }),
   }
 }
 

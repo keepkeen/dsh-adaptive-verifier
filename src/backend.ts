@@ -31,6 +31,7 @@ function discreteDistribution(letter: string): ScoreDistribution {
     normalizedEntropy: 1,
     coverage: 0,
     actualToken: letter.toUpperCase(),
+    source: 'categorical',
     probabilities: [{ token: letter.toUpperCase(), probability: 1, value }],
   }
 }
@@ -44,7 +45,6 @@ function fallbackScores(text: string): { scoreA: ScoreDistribution; scoreB: Scor
 
 export class DeepSeekPairwiseBackend implements PairwiseBackend {
   private readonly cache: ScoreCache<CachedObservation>
-
   constructor(
     private readonly client: DeepSeekClient,
     private readonly extractor: EvidenceExtractor,
@@ -77,9 +77,10 @@ export class DeepSeekPairwiseBackend implements PairwiseBackend {
       evidenceLevel: options.evidenceLevel,
       extractor: this.extractor,
     })
+    const model = this.config.verifier.model ?? this.config.deepseek.model
     const key = hashObject({
-      version: 1,
-      model: this.config.deepseek.model,
+      version: 2,
+      model,
       messages,
       criterion: criterion.id,
       level: options.evidenceLevel,
@@ -93,7 +94,7 @@ export class DeepSeekPairwiseBackend implements PairwiseBackend {
     let liveUsage = emptyUsage()
     const { value, hit } = await this.cache.getOrCompute(key, async () => {
       const request: DeepSeekRequest = {
-        model: this.config.deepseek.model,
+        model,
         messages,
         temperature: options.temperature,
         max_tokens: options.effort === 'off' ? 64 : 16_384,
@@ -110,7 +111,8 @@ export class DeepSeekPairwiseBackend implements PairwiseBackend {
       const mapped = options.reverse
         ? { scoreA: parsed.scoreB, scoreB: parsed.scoreA }
         : { scoreA: parsed.scoreA, scoreB: parsed.scoreB }
-      return { ...mapped, rawText: rawText || ('text' in parsed ? parsed.text : undefined) }
+      const parsedText = 'text' in parsed && typeof parsed.text === 'string' ? parsed.text : undefined
+      return { ...mapped, rawText: rawText || parsedText }
     })
 
     return {

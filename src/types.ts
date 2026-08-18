@@ -25,6 +25,8 @@ export interface ScoreDistribution {
   normalizedEntropy: number
   coverage: number
   actualToken?: string
+  /** How this score distribution was obtained. */
+  source?: 'logprob' | 'categorical'
   probabilities: ScoreTokenProbability[]
 }
 
@@ -232,9 +234,24 @@ export interface RankingConfig {
   maxRescuedCandidates: number
 }
 
+export interface VerifierRouteConfig {
+  /** Harness is provider-agnostic. DeepSeek logprob mode is an explicit provider-specific opt-in. */
+  backend: 'harness' | 'deepseek-logprob'
+  /** Optional fixed Harness provider for verifier calls. Omit to inherit the current agent request route. */
+  provider?: string
+  /** Optional fixed verifier model. Omit to inherit the current agent request model in Harness mode. */
+  model?: string
+}
+
 export interface VerifiedAdapterConfig {
   enabled: boolean
+  /** Transparent mode keeps the Harness-selected provider/model and intercepts agent-loop requests. */
+  transparent: boolean
+  /** Optional provider filter. Empty means every Harness agent-loop provider. */
+  targetProviders: string[]
+  /** Legacy explicit provider route used only when transparent=false. */
   provider: string
+  /** Legacy explicit generator override used only when transparent=false. */
   generatorModel?: string
   initialCandidates: number
   maxCandidates: number
@@ -254,7 +271,10 @@ export interface HookConfig {
 }
 
 export interface AdaptiveVerifierConfig {
+  /** Standalone / explicit DeepSeek-logprob backend configuration only. */
   deepseek: DeepSeekClientConfig
+  /** Independent verifier routing. Never inferred by parsing generator credentials. */
+  verifier: VerifierRouteConfig
   cache: CacheConfig
   evidence: EvidenceConfig
   verification: VerificationConfig
@@ -340,7 +360,13 @@ export interface GenerateCandidateResult {
   toolCalls: Array<{ id: string; name: string; arguments: string }>
   finishReason: string
   usage: TokenUsage
-  raw: DeepSeekResponse
+  raw: unknown
+  /** Original provider-neutral assistant blocks when generated through Harness. */
+  blocks?: HarnessContentBlock[]
+  /** Adapter-private replay state from the winning upstream stream. */
+  replayState?: unknown
+  /** Original provider-neutral finish reason from the winning upstream stream. */
+  nativeFinishReason?: Record<string, unknown>
 }
 
 export interface PairwiseBackend {
@@ -401,7 +427,7 @@ export type HarnessStreamChunk =
   | { type: 'tool-call-delta'; index: number; id: string; name?: string; argumentsDelta: string }
   | { type: 'block-end'; index: number; block: HarnessContentBlock }
   | { type: 'usage'; usage: { inputTokens: number; outputTokens: number; cacheReadTokens?: number; cacheWriteTokens?: number; reasoningTokens?: number } }
-  | { type: 'finish'; reason: Record<string, unknown> }
+  | { type: 'finish'; reason: Record<string, unknown>; replayState?: unknown }
 
 export interface SessionEvidenceState {
   events: unknown[]

@@ -63,6 +63,7 @@ export function distributionFromToken(item: DeepSeekTokenLogprob): ScoreDistribu
       normalizedEntropy: 1,
       coverage: 0,
       actualToken: actualValue === undefined ? undefined : actualLetter,
+      source: 'logprob',
       probabilities: [],
     }
   }
@@ -90,6 +91,7 @@ export function distributionFromToken(item: DeepSeekTokenLogprob): ScoreDistribu
     normalizedEntropy: clamp(entropy / Math.log(20)),
     coverage: clamp(coverage),
     actualToken: actualValue === undefined ? undefined : actualLetter,
+    source: 'logprob',
     probabilities,
   }
 }
@@ -121,6 +123,7 @@ export function extractPairDistributions(tokens: DeepSeekTokenLogprob[]): {
 }
 
 export function distributionReliability(distribution: ScoreDistribution): number {
+  if (distribution.source === 'categorical') return 0.42
   const coverage = clamp(distribution.coverage)
   const sharpness = clamp(1 - distribution.normalizedEntropy)
   const variancePenalty = clamp(1 - Math.sqrt(distribution.variance) * 2)

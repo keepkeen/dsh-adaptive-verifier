@@ -2,11 +2,13 @@ declare module '@deepseek-ai/cordis' {
   export interface Context {
     llm: {
       registerAdapter(providers: string[], adapter: unknown): unknown
+      stream(options: import('@deepseek-ai/dsh-llm').GenerateOptions): AsyncIterable<import('@deepseek-ai/dsh-llm').StreamChunk>
     }
     logger?: {
       info?: (...args: unknown[]) => void
       warn?: (...args: unknown[]) => void
     }
+    get(name: string): any
     on(event: string, listener: (...args: any[]) => any): unknown
   }
   export class Service {
@@ -49,5 +51,6 @@ declare module '@deepseek-ai/dsh-llm' {
     resolveModel(provider: string, model: string, signal?: AbortSignal): Promise<LlmResolvedModelInfo>
     stream(options: GenerateOptions): AsyncIterable<StreamChunk>
   }
-  export function createUserMessage(input: unknown): unknown
+  export function createUserMessage(input: unknown): any
+  export function isAgentLoopRequest(options: GenerateOptions): boolean
 }

@@ -58,7 +58,12 @@ export const DEFAULT_CONFIG: AdaptiveVerifierConfig = {
     retryInitialDelayMs: 500,
     retryMaxDelayMs: 10_000,
     concurrency: 16,
-    userAgent: 'dsh-adaptive-verifier/0.1.0',
+    userAgent: 'dsh-adaptive-verifier/0.2.0',
+  },
+  verifier: {
+    backend: 'harness',
+    provider: undefined,
+    model: undefined,
   },
   cache: {
     enabled: true,
@@ -127,12 +132,14 @@ export const DEFAULT_CONFIG: AdaptiveVerifierConfig = {
   budget: DEFAULT_BUDGET,
   adapter: {
     enabled: true,
+    transparent: true,
+    targetProviders: [],
     provider: 'deepseek-verified',
-    generatorModel: 'deepseek-v4-flash',
+    generatorModel: undefined,
     initialCandidates: 2,
     maxCandidates: 4,
     generationTemperature: 0.6,
-    generationMaxTokens: 32_768,
+    generationMaxTokens: undefined,
     actionCriteria: ACTION_CRITERIA,
     selectionBudget: {
       maxCalls: 8,
@@ -196,7 +203,22 @@ export function resolveConfig(patch?: Partial<AdaptiveVerifierConfig>): Adaptive
   if (!(config.verification.bradleyTerryTemperature > 0)) {
     throw new Error('verification.bradleyTerryTemperature must be positive')
   }
+  if (config.verifier.backend !== 'harness' && config.verifier.backend !== 'deepseek-logprob') {
+    throw new Error('verifier.backend must be harness or deepseek-logprob')
+  }
+  if (config.verifier.provider !== undefined && config.verifier.provider.length === 0) {
+    throw new Error('verifier.provider must be non-empty when provided')
+  }
+  if (config.verifier.model !== undefined && config.verifier.model.length === 0) {
+    throw new Error('verifier.model must be non-empty when provided')
+  }
+  if (config.verifier.backend === 'deepseek-logprob' && config.verifier.provider !== undefined) {
+    throw new Error('verifier.provider is only valid for the harness backend; deepseek-logprob uses explicit deepseek.* transport config')
+  }
   positiveInteger(config.ranking.finalists, 'ranking.finalists')
+  if (!Array.isArray(config.adapter.targetProviders) || config.adapter.targetProviders.some(provider => !provider)) {
+    throw new Error('adapter.targetProviders must contain non-empty provider names')
+  }
   positiveInteger(config.adapter.initialCandidates, 'adapter.initialCandidates')
   positiveInteger(config.adapter.maxCandidates, 'adapter.maxCandidates')
   if (config.adapter.initialCandidates > config.adapter.maxCandidates) {

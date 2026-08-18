@@ -15,7 +15,7 @@ Mitigations in this repository:
 - rejected action candidates never reach Harness tool dispatch;
 - cache files use request hashes and contain scores rather than raw prompts;
 - cache files are written with owner-only mode where supported;
-- API keys are read from an environment-variable reference and never serialized;
+- In normal Harness mode, the main plugin does not resolve provider API keys at all; verifier/generator calls go through `ctx.llm` and the selected adapter owns credentials. Explicit provider-specific logprob backends own their separate credential configuration; secrets are never serialized;
 - live API tests are opt-in;
 - evidence enforcement defaults to advisory;
 - explicit budgets bound expensive verification loops.

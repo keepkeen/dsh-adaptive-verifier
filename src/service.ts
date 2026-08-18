@@ -9,13 +9,20 @@ import type {
   VerifierCriterion,
 } from './types.js'
 import { AdaptiveVerifierCore } from './core.js'
+import { resolveConfig } from './config.js'
+import { HarnessPairwiseBackend } from './harness-backend.js'
 
 export class AdaptiveVerifierRuntime extends Service {
   readonly core: AdaptiveVerifierCore
 
   constructor(ctx: Context, config?: Partial<AdaptiveVerifierConfig>) {
     super(ctx, 'adaptiveVerifier')
-    this.core = new AdaptiveVerifierCore(config)
+    const resolved = resolveConfig(config)
+    this.core = resolved.verifier.backend === 'harness'
+      ? new AdaptiveVerifierCore(resolved, (extractor, effective) => (
+          new HarnessPairwiseBackend(ctx, extractor, effective)
+        ))
+      : new AdaptiveVerifierCore(resolved)
   }
 
   get config(): AdaptiveVerifierConfig {

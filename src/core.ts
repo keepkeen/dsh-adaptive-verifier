@@ -3,6 +3,7 @@ import type {
   EvidencePacket,
   PairCompareOptions,
   PairDecision,
+  PairwiseBackend,
   SelectionResult,
   VerifierCandidate,
   VerifierCriterion,
@@ -13,20 +14,30 @@ import { DeepSeekPairwiseBackend } from './backend.js'
 import { EvidenceExtractor, SessionEvidenceTracker } from './evidence.js'
 import { AdaptiveRanker } from './ranker.js'
 
+export type PairwiseBackendFactory = (
+  extractor: EvidenceExtractor,
+  config: AdaptiveVerifierConfig,
+) => PairwiseBackend
+
 export class AdaptiveVerifierCore {
   readonly config: AdaptiveVerifierConfig
   readonly client: DeepSeekClient
   readonly evidence: EvidenceExtractor
   readonly tracker: SessionEvidenceTracker
-  readonly backend: DeepSeekPairwiseBackend
+  readonly backend: PairwiseBackend
   readonly ranker: AdaptiveRanker
 
-  constructor(config?: Partial<AdaptiveVerifierConfig>) {
+  constructor(
+    config?: Partial<AdaptiveVerifierConfig>,
+    backendFactory?: PairwiseBackendFactory,
+  ) {
     this.config = resolveConfig(config)
     this.client = new DeepSeekClient(this.config.deepseek)
     this.evidence = new EvidenceExtractor(this.config.evidence)
     this.tracker = new SessionEvidenceTracker(this.evidence)
-    this.backend = new DeepSeekPairwiseBackend(this.client, this.evidence, this.config)
+    this.backend = backendFactory
+      ? backendFactory(this.evidence, this.config)
+      : new DeepSeekPairwiseBackend(this.client, this.evidence, this.config)
     this.ranker = new AdaptiveRanker(this.backend, this.evidence, this.config)
   }
 
